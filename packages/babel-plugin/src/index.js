@@ -5,7 +5,7 @@ import importAsyncProperty from './properties/importAsync'
 import requireAsyncProperty from './properties/requireAsync'
 import requireSyncProperty from './properties/requireSync'
 import resolveProperty from './properties/resolve'
-import stateProperty from './properties/state';
+import stateProperty from './properties/state'
 
 const properties = [
   stateProperty,
@@ -19,7 +19,7 @@ const properties = [
 
 const LOADABLE_COMMENT = '#__LOADABLE__'
 
-const loadablePlugin = api => {
+const loadablePlugin = (api, options) => {
   const { types: t } = api
 
   function collectImportCallPaths(startPath) {
@@ -36,6 +36,7 @@ const loadablePlugin = api => {
 
   function isValidIdentifier(path) {
     // `loadable()`
+
     if (path.get('callee').isIdentifier({ name: 'loadable' })) {
       return true
     }
@@ -61,6 +62,7 @@ const loadablePlugin = api => {
 
   function getFuncPath(path) {
     const funcPath = path.isCallExpression() ? path.get('arguments.0') : path
+
     if (
       !funcPath.isFunctionExpression() &&
       !funcPath.isArrowFunctionExpression() &&
@@ -69,6 +71,23 @@ const loadablePlugin = api => {
       return null
     }
     return funcPath
+  }
+
+  function tranfromImportFromMember(path, cb) {
+    let result = false
+    path.traverse({
+      MemberExpression(memberPath) {
+        let { parent } = memberPath.get('callee')
+        let isParent = parent.object.name === options.objectName
+        let isDefault = parent.property.name === options.propertyName
+        if (isParent && isDefault) {
+          cb(path)
+        } else if (!isValidIdentifier(path)) {
+          return
+        }
+        cb(path)
+      },
+    })
   }
 
   function transformImport(path) {
@@ -110,8 +129,7 @@ const loadablePlugin = api => {
     inherits: syntaxDynamicImport,
     visitor: {
       CallExpression(path) {
-        if (!isValidIdentifier(path)) return
-        transformImport(path)
+        tranfromImportFromMember(path, transformImport)
       },
       'ArrowFunctionExpression|FunctionExpression|ObjectMethod': path => {
         if (!hasLoadableComment(path)) return

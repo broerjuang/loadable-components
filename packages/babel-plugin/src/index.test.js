@@ -4,7 +4,7 @@ import plugin from '.'
 
 const testPlugin = code => {
   const result = transform(code, {
-    plugins: [plugin],
+    plugins: [[plugin, { fn: 'Component.default' }]],
     configFile: false,
   })
 
@@ -15,7 +15,7 @@ describe('plugin', () => {
   describe('simple import', () => {
     it('should work with template literal', () => {
       const result = testPlugin(`
-        loadable(() => import(\`./ModA\`))
+        Component.default(() => import(\`./ModA\`))
       `)
 
       expect(result).toMatchSnapshot()
@@ -23,7 +23,7 @@ describe('plugin', () => {
 
     it('should work with + concatenation', () => {
       const result = testPlugin(`
-        loadable(() => import('./Mod' + 'A'))
+      Component.default(() => import('./Mod' + 'A'))
       `)
 
       expect(result).toMatchSnapshot()
@@ -31,7 +31,7 @@ describe('plugin', () => {
 
     it('should work with * in name', () => {
       const result = testPlugin(`
-        loadable(() => import(\`./foo*\`))
+      Component.default(() => import(\`./foo*\`))
       `)
 
       expect(result).toMatchSnapshot()
@@ -39,7 +39,7 @@ describe('plugin', () => {
 
     it('should transform path into "chunk-friendly" name', () => {
       const result = testPlugin(`
-        loadable(() => import('../foo/bar'))
+      Component.default(() => import('../foo/bar'))
       `)
 
       expect(result).toMatchSnapshot()
@@ -48,7 +48,7 @@ describe('plugin', () => {
     describe('with "webpackChunkName" comment', () => {
       it('should use it', () => {
         const result = testPlugin(`
-          loadable(() => import(/* webpackChunkName: "ChunkA" */ './ModA'))
+        Component.default(() => import(/* webpackChunkName: "ChunkA" */ './ModA'))
         `)
 
         expect(result).toMatchSnapshot()
@@ -56,7 +56,7 @@ describe('plugin', () => {
 
       it('should use it even if comment is separated by ","', () => {
         const result = testPlugin(`
-          loadable(() => import(/* webpackPrefetch: true, webpackChunkName: "ChunkA" */ './ModA'))
+        Component.default(() => import(/* webpackPrefetch: true, webpackChunkName: "ChunkA" */ './ModA'))
         `)
 
         expect(result).toMatchSnapshot()
@@ -66,7 +66,7 @@ describe('plugin', () => {
     describe('without "webpackChunkName" comment', () => {
       it('should add it', () => {
         const result = testPlugin(`
-          loadable(() => import('./ModA'))
+        Component.default(() => import('./ModA'))
         `)
 
         expect(result).toMatchSnapshot()
@@ -76,7 +76,7 @@ describe('plugin', () => {
     describe('in a complex promise', () => {
       it('should work', () => {
         const result = testPlugin(`
-          loadable(() => timeout(import('./ModA'), 2000))
+        Component.default(() => timeout(import('./ModA'), 2000))
         `)
 
         expect(result).toMatchSnapshot()
@@ -87,7 +87,7 @@ describe('plugin', () => {
   describe('aggressive import', () => {
     it('should work with destructuration', () => {
       const result = testPlugin(`
-        loadable(({ foo }) => import(/* webpackChunkName: "Pages" */ \`./\${foo}\`))
+      Component.default(({ foo }) => import(/* webpackChunkName: "Pages" */ \`./\${foo}\`))
       `)
       expect(result).toMatchSnapshot()
     })
@@ -95,7 +95,7 @@ describe('plugin', () => {
     describe('with "webpackChunkName"', () => {
       it('should replace it', () => {
         const result = testPlugin(`
-          loadable(props => import(/* webpackChunkName: "Pages" */ \`./\${props.foo}\`))
+        Component.default(props => import(/* webpackChunkName: "Pages" */ \`./\${props.foo}\`))
         `)
 
         expect(result).toMatchSnapshot()
@@ -105,7 +105,7 @@ describe('plugin', () => {
     describe('without "webpackChunkName"', () => {
       it('should support simple request', () => {
         const result = testPlugin(`
-          loadable(props => import(\`./\${props.foo}\`))
+        Component.default(props => import(\`./\${props.foo}\`))
         `)
 
         expect(result).toMatchSnapshot()
@@ -113,7 +113,7 @@ describe('plugin', () => {
 
       it('should support complex request', () => {
         const result = testPlugin(`
-          loadable(props => import(\`./dir/\${props.foo}/test\`))
+        Component.default(props => import(\`./dir/\${props.foo}/test\`))
         `)
 
         expect(result).toMatchSnapshot()
@@ -121,7 +121,7 @@ describe('plugin', () => {
 
       it('should support destructuring', () => {
         const result = testPlugin(`
-          loadable(({ foo }) => import(\`./dir/\${foo}/test\`))
+        Component.default(({ foo }) => import(\`./dir/\${foo}/test\`))
         `)
 
         expect(result).toMatchSnapshot()
@@ -132,7 +132,7 @@ describe('plugin', () => {
   describe('loadable.lib', () => {
     it('should be transpiled too', () => {
       const result = testPlugin(`
-        loadable.lib(() => import('moment'))
+      Component.default.lib(() => import('moment'))
       `)
 
       expect(result).toMatchSnapshot()

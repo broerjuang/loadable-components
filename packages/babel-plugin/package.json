@@ -1,5 +1,5 @@
 {
-  "name": "@loadable/babel-plugin",
+  "name": "@reloadable/babel-plugin",
   "description": "Babel plugin for loadable (required for SSR).",
   "version": "5.11.0",
   "main": "lib/index.js",
